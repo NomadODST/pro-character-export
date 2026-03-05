@@ -1,30 +1,33 @@
-Hooks.on("renderActorSheet", (app, html) => {
+Hooks.on("renderActorSheet5eCharacter", (app, html) => addExportButton(app, html));
+Hooks.on("renderActorSheet", (app, html) => addExportButton(app, html));
 
-if (!app.actor || app.actor.type !== "character") return;
+function addExportButton(app, html){
 
-const btn = $(`     <a class="pro-export">       <i class="fas fa-file-pdf"></i> Export 5E PDF     </a>
-  `);
+if(!app.actor || app.actor.type !== "character") return;
 
-btn.click(() => exportOfficialPDF(app.actor));
+if(html.find(".pro-export").length) return;
 
-html.closest(".app").find(".window-title").after(btn);
-});
+const button = $(`<a class="pro-export"> <i class="fas fa-file-pdf"></i> Export 5E PDF </a>`);
+
+button.click(() => exportOfficialPDF(app.actor));
+
+html.closest(".app").find(".window-title").after(button);
+
+}
 
 function abilityMod(score){
 return Math.floor((score-10)/2);
 }
 
 function safeSet(form, field, value){
-try {
-const f = form.getTextField(field);
-f.setText(String(value ?? ""));
-} catch(e){}
+try{
+form.getTextField(field).setText(String(value ?? ""));
+}catch(e){}
 }
 
-function safeCheck(form, field, checked=true){
+function safeCheck(form, field){
 try{
-const f = form.getCheckBox(field);
-if(checked) f.check(); else f.uncheck();
+form.getCheckBox(field).check();
 }catch(e){}
 }
 
@@ -37,23 +40,19 @@ const existingPdfBytes = await fetch(
 ).then(res => res.arrayBuffer());
 
 const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+
 const form = pdfDoc.getForm();
 
-/* ─────────────────────────
-BASIC CHARACTER DATA
-───────────────────────── */
+/* BASIC */
 
 safeSet(form,"CharacterName",actor.name);
-safeSet(form,"CharacterName 2",actor.name);
 safeSet(form,"PlayerName",game.user.name);
 
 safeSet(form,"Race",sys.details?.race || "");
 safeSet(form,"Alignment",sys.details?.alignment || "");
 safeSet(form,"ClassLevel",sys.details?.level || "");
 
-/* ─────────────────────────
-ABILITIES + MODIFIERS
-───────────────────────── */
+/* ABILITIES */
 
 const abilities = {
 STR: sys.abilities.str.value,
@@ -69,9 +68,7 @@ safeSet(form,k,v);
 safeSet(form,k+"mod",abilityMod(v));
 });
 
-/* ─────────────────────────
-SAVING THROWS
-───────────────────────── */
+/* SAVES */
 
 safeSet(form,"ST Strength",sys.abilities.str.save);
 safeSet(form,"ST Dexterity",sys.abilities.dex.save);
@@ -80,15 +77,11 @@ safeSet(form,"ST Intelligence",sys.abilities.int.save);
 safeSet(form,"ST Wisdom",sys.abilities.wis.save);
 safeSet(form,"ST Charisma",sys.abilities.cha.save);
 
-/* ─────────────────────────
-PROFICIENCY
-───────────────────────── */
+/* PROF */
 
 safeSet(form,"ProfBonus",sys.attributes.prof);
 
-/* ─────────────────────────
-COMBAT
-───────────────────────── */
+/* COMBAT */
 
 safeSet(form,"ArmorClass",sys.attributes.ac.value);
 safeSet(form,"Initiative",sys.attributes.init.mod);
@@ -97,29 +90,22 @@ safeSet(form,"Speed",sys.attributes.movement.walk);
 safeSet(form,"HPMax",sys.attributes.hp.max);
 safeSet(form,"HPCurrent",sys.attributes.hp.value);
 
-/* ─────────────────────────
-PASSIVE PERCEPTION
-───────────────────────── */
+/* PASSIVE */
 
 safeSet(form,"Passive",sys.skills.prc.passive);
 
-/* ─────────────────────────
-SKILLS
-───────────────────────── */
+/* SKILLS */
 
 Object.entries(sys.skills).forEach(([k,v])=>{
 safeSet(form,k.toUpperCase(),v.total);
 });
 
-/* ─────────────────────────
-ATTACKS
-───────────────────────── */
+/* ATTACKS */
 
-const attacks = actor.items.filter(i => i.system?.damage?.parts?.length);
+const attacks = actor.items.filter(i=>i.system?.damage?.parts?.length);
 
 for(let i=0;i<attacks.length && i<3;i++){
 
-```
 const atk = attacks[i];
 
 safeSet(form,"Wpn Name"+(i+1),atk.name);
@@ -129,15 +115,11 @@ const dmgType = atk.system.damage.parts?.[0]?.[1] || "";
 
 safeSet(form,"Wpn"+(i+1)+" Damage",`${dmg} ${dmgType}`);
 
-const hit = atk.system.attackBonus || "";
-safeSet(form,"Wpn"+(i+1)+" AtkBonus",hit);
-```
+safeSet(form,"Wpn"+(i+1)+" AtkBonus",atk.system.attackBonus || "");
 
 }
 
-/* ─────────────────────────
-SPELLCASTING
-───────────────────────── */
+/* SPELLCASTING */
 
 safeSet(form,"SpellcastingAbility",sys.attributes.spellcasting);
 
@@ -145,45 +127,37 @@ safeSet(form,"SpellcastingAbility",sys.attributes.spellcasting);
 
 if(sys.spells){
 
-```
 Object.entries(sys.spells).forEach(([lvl,data])=>{
 
-  if(lvl==="pact") return;
+if(lvl==="pact") return;
 
-  const level = lvl.replace("spell","");
+const level = lvl.replace("spell","");
 
-  safeSet(form,"SpellSlots"+level,data.max);
-  safeSet(form,"SpellSlots"+level+"Remaining",data.value);
+safeSet(form,"SpellSlots"+level,data.max);
+safeSet(form,"SpellSlots"+level+"Remaining",data.value);
 
 });
-```
 
 }
 
-/* ─────────────────────────
-SPELL LIST PAGE 2
-───────────────────────── */
+/* SPELL LIST */
 
-const spells = actor.items.filter(i => i.type==="spell");
+const spells = actor.items.filter(i=>i.type==="spell");
 
 spells.slice(0,30).forEach((spell,i)=>{
 
-```
 const idx = i+1;
 
 safeSet(form,"Spell "+idx,spell.name);
 safeSet(form,"SpellLevel "+idx,spell.system.level);
 
 if(spell.system.preparation?.prepared){
-  safeCheck(form,"Prepared "+idx,true);
+safeCheck(form,"Prepared "+idx);
 }
-```
 
 });
 
-/* ─────────────────────────
-FEATURES / TRAITS
-───────────────────────── */
+/* FEATURES */
 
 const features = actor.items
 .filter(i=>i.type==="feat")
@@ -192,9 +166,7 @@ const features = actor.items
 
 safeSet(form,"Features and Traits",features);
 
-/* ─────────────────────────
-EQUIPMENT / INVENTORY
-───────────────────────── */
+/* EQUIPMENT */
 
 const equipment = actor.items
 .filter(i=>["equipment","weapon","tool","consumable","loot"].includes(i.type))
@@ -203,9 +175,7 @@ const equipment = actor.items
 
 safeSet(form,"Equipment",equipment);
 
-/* ─────────────────────────
-SAVE PDF
-───────────────────────── */
+/* SAVE PDF */
 
 const pdfBytes = await pdfDoc.save();
 
