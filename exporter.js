@@ -61,34 +61,155 @@ const sys = actor.system;
 
 let html = `
 <html>
+
 <head>
-<link rel="stylesheet" href="sheet.css">
+<meta charset="UTF-8">
+
+<style>
+
+body{
+font-family:serif;
+max-width:900px;
+margin:auto;
+padding:40px;
+background:white;
+}
+
+.header{
+display:flex;
+gap:30px;
+align-items:center;
+}
+
+.portrait{
+width:180px;
+border:2px solid black;
+}
+
+.title{
+font-size:32px;
+font-weight:bold;
+}
+
+.stats{
+margin-top:10px;
+}
+
+.abilities{
+display:grid;
+grid-template-columns:repeat(6,1fr);
+gap:10px;
+margin-top:20px;
+}
+
+.ability{
+border:2px solid black;
+padding:10px;
+text-align:center;
+font-weight:bold;
+}
+
+.section{
+margin-top:25px;
+border:2px solid black;
+padding:15px;
+}
+
+.section h2{
+margin-top:0;
+border-bottom:1px solid black;
+}
+
+.list{
+columns:2;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<h1>${actor.name}</h1>
+<div class="header">
 
 <img src="${actor.img}" class="portrait">
 
-<h2>Abilities</h2>
+<div>
 
-<ul>
-<li>STR ${sys.abilities.str.value}</li>
-<li>DEX ${sys.abilities.dex.value}</li>
-<li>CON ${sys.abilities.con.value}</li>
-<li>INT ${sys.abilities.int.value}</li>
-<li>WIS ${sys.abilities.wis.value}</li>
-<li>CHA ${sys.abilities.cha.value}</li>
-</ul>
+<div class="title">${actor.name}</div>
 
-<h2>Combat</h2>
+<div class="stats">
 
-HP ${sys.attributes.hp.value}/${sys.attributes.hp.max}<br>
-AC ${sys.attributes.ac.value}<br>
+AC ${sys.attributes.ac.value} |
+HP ${sys.attributes.hp.value}/${sys.attributes.hp.max} |
 Speed ${sys.attributes.movement.walk}
 
+</div>
+
+</div>
+
+</div>
+
+<div class="abilities">
+
+<div class="ability">STR<br>${sys.abilities.str.value}</div>
+<div class="ability">DEX<br>${sys.abilities.dex.value}</div>
+<div class="ability">CON<br>${sys.abilities.con.value}</div>
+<div class="ability">INT<br>${sys.abilities.int.value}</div>
+<div class="ability">WIS<br>${sys.abilities.wis.value}</div>
+<div class="ability">CHA<br>${sys.abilities.cha.value}</div>
+
+</div>
+
+<div class="section">
+
+<h2>Skills</h2>
+
+<div class="list">
+
+${Object.entries(sys.skills)
+.map(([k,v]) => `${k.toUpperCase()} +${v.total}`)
+.join("<br>")}
+
+</div>
+
+</div>
+
+<div class="section">
+
+<h2>Attacks</h2>
+
+${actor.items
+.filter(i => i.system?.damage?.parts?.length)
+.map(i => `<div>${i.name}</div>`)
+.join("")}
+
+</div>
+
+<div class="section">
+
+<h2>Spells</h2>
+
+${actor.items
+.filter(i => i.type === "spell")
+.map(i => `<div>${i.name}</div>`)
+.join("")}
+
+</div>
+
+<div class="section">
+
+<h2>Equipment</h2>
+
+${actor.items
+.filter(i => i.type === "equipment")
+.map(i => `<div>${i.name}</div>`)
+.join("")}
+
+</div>
+
 </body>
+
 </html>
 `;
 
