@@ -1,17 +1,22 @@
+.pro-export-sheet{
 
-body{
 font-family:serif;
 max-width:900px;
 margin:auto;
+
 }
 
-.portrait{
+.pro-export-sheet .portrait{
+
 width:200px;
 border:2px solid black;
+
 }
 
-.spell-card{
+.pro-export-sheet .spell-card{
+
 border:1px solid black;
 padding:10px;
 margin:10px;
+
 }
