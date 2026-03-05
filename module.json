@@ -1,12 +1,11 @@
 {
   "id": "pro-character-export",
   "title": "Pro Character Export",
-  "description": "Professional character export tool for DnD5e",
-  "version": "3.5",
-
+  "description": "Export Foundry characters to the official 5E character sheet PDF",
+  "version": "4.5",
   "authors": [
     {
-      "name": "DM Toolkit"
+      "name": "NomadODST"
     }
   ],
 
@@ -20,10 +19,6 @@
     "exporter.js"
   ],
 
-  "styles": [
-    "styles/sheet.css"
-  ],
-
   "relationships": {
     "systems": [
       {
@@ -34,8 +29,6 @@
   },
 
   "url": "https://github.com/NomadODST/pro-character-export",
-
   "manifest": "https://raw.githubusercontent.com/NomadODST/pro-character-export/main/module.json",
-
   "download": "https://github.com/NomadODST/pro-character-export/archive/refs/heads/main.zip"
 }
