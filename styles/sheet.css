@@ -1,0 +1,17 @@
+
+body{
+font-family:serif;
+max-width:900px;
+margin:auto;
+}
+
+.portrait{
+width:200px;
+border:2px solid black;
+}
+
+.spell-card{
+border:1px solid black;
+padding:10px;
+margin:10px;
+}

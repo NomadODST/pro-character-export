@@ -1,0 +1,30 @@
+{
+  "id": "pro-character-export",
+  "title": "Pro Character Export",
+  "description": "Professional DnD5e character export tool",
+  "version": "2.0.0",
+  "authors": [
+    {
+      "name": "DM Toolkit"
+    }
+  ],
+  "compatibility": {
+  "minimum": "10",
+  "verified": "12",
+  "maximum": "12"
+	},
+  "scripts": [
+    "exporter.js"
+  ],
+  "styles": [
+    "styles/sheet.css"
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system"
+      }
+    ]
+  }
+}
