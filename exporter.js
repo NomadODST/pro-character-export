@@ -1,436 +1,222 @@
 Hooks.on("renderActorSheet", (app, html) => {
 
-if (!app.actor) return;
+if (!app.actor || app.actor.type !== "character") return;
 
-const btn = $(`   <a class="pro-export">   <i class="fas fa-file-export"></i> Export   </a>`);
+const btn = $(`     <a class="pro-export">       <i class="fas fa-file-pdf"></i> Export 5E PDF     </a>
+  `);
 
-btn.click(() => openExportMenu(app.actor));
+btn.click(() => exportOfficialPDF(app.actor));
 
 html.closest(".app").find(".window-title").after(btn);
-
 });
 
-function openExportMenu(actor){
-
-new Dialog({
-
-title:"Export Tools",
-
-content:`Choose Export Type`,
-
-buttons:{
-
-sheet:{
-label:"5E Character Sheet (PDF)",
-callback:()=>exportCharacterSheet(actor)
-},
-
-spells:{
-label:"Spell Cards",
-callback:()=>exportSpellCards(actor)
-},
-
-inventory:{
-label:"Inventory Cards",
-callback:()=>exportInventory(actor)
-},
-
-statblock:{
-label:"Monster Statblock",
-callback:()=>exportStatblock(actor)
-},
-
-party:{
-label:"Export Party",
-callback:()=>exportParty()
-}
-
-}
-
-}).render(true)
-
-}
-
-function openPrintable(html){
-
-const w = window.open("", "_blank");
-
-w.document.write(html);
-
-w.document.close();
-
-setTimeout(()=>{
-w.print();
-},500);
-
-}
-
 function abilityMod(score){
-return Math.floor((score-10)/2)
+return Math.floor((score-10)/2);
 }
 
-function exportCharacterSheet(actor){
+function safeSet(form, field, value){
+try {
+const f = form.getTextField(field);
+f.setText(String(value ?? ""));
+} catch(e){}
+}
+
+function safeCheck(form, field, checked=true){
+try{
+const f = form.getCheckBox(field);
+if(checked) f.check(); else f.uncheck();
+}catch(e){}
+}
+
+async function exportOfficialPDF(actor){
 
 const sys = actor.system;
 
-let html = `
+const existingPdfBytes = await fetch(
+"modules/pro-character-export/templates/5e-character-sheet.pdf"
+).then(res => res.arrayBuffer());
 
-<html>
+const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+const form = pdfDoc.getForm();
 
-<head>
+/* ─────────────────────────
+BASIC CHARACTER DATA
+───────────────────────── */
 
-<meta charset="UTF-8">
+safeSet(form,"CharacterName",actor.name);
+safeSet(form,"CharacterName 2",actor.name);
+safeSet(form,"PlayerName",game.user.name);
 
-<style>
+safeSet(form,"Race",sys.details?.race || "");
+safeSet(form,"Alignment",sys.details?.alignment || "");
+safeSet(form,"ClassLevel",sys.details?.level || "");
 
-body{
+/* ─────────────────────────
+ABILITIES + MODIFIERS
+───────────────────────── */
 
-font-family:Georgia,serif;
-background:white;
-margin:0;
-padding:20px;
+const abilities = {
+STR: sys.abilities.str.value,
+DEX: sys.abilities.dex.value,
+CON: sys.abilities.con.value,
+INT: sys.abilities.int.value,
+WIS: sys.abilities.wis.value,
+CHA: sys.abilities.cha.value
+};
+
+Object.entries(abilities).forEach(([k,v])=>{
+safeSet(form,k,v);
+safeSet(form,k+"mod",abilityMod(v));
+});
+
+/* ─────────────────────────
+SAVING THROWS
+───────────────────────── */
+
+safeSet(form,"ST Strength",sys.abilities.str.save);
+safeSet(form,"ST Dexterity",sys.abilities.dex.save);
+safeSet(form,"ST Constitution",sys.abilities.con.save);
+safeSet(form,"ST Intelligence",sys.abilities.int.save);
+safeSet(form,"ST Wisdom",sys.abilities.wis.save);
+safeSet(form,"ST Charisma",sys.abilities.cha.save);
+
+/* ─────────────────────────
+PROFICIENCY
+───────────────────────── */
+
+safeSet(form,"ProfBonus",sys.attributes.prof);
+
+/* ─────────────────────────
+COMBAT
+───────────────────────── */
+
+safeSet(form,"ArmorClass",sys.attributes.ac.value);
+safeSet(form,"Initiative",sys.attributes.init.mod);
+safeSet(form,"Speed",sys.attributes.movement.walk);
+
+safeSet(form,"HPMax",sys.attributes.hp.max);
+safeSet(form,"HPCurrent",sys.attributes.hp.value);
+
+/* ─────────────────────────
+PASSIVE PERCEPTION
+───────────────────────── */
+
+safeSet(form,"Passive",sys.skills.prc.passive);
+
+/* ─────────────────────────
+SKILLS
+───────────────────────── */
+
+Object.entries(sys.skills).forEach(([k,v])=>{
+safeSet(form,k.toUpperCase(),v.total);
+});
+
+/* ─────────────────────────
+ATTACKS
+───────────────────────── */
+
+const attacks = actor.items.filter(i => i.system?.damage?.parts?.length);
+
+for(let i=0;i<attacks.length && i<3;i++){
+
+```
+const atk = attacks[i];
+
+safeSet(form,"Wpn Name"+(i+1),atk.name);
+
+const dmg = atk.system.damage.parts?.[0]?.[0] || "";
+const dmgType = atk.system.damage.parts?.[0]?.[1] || "";
+
+safeSet(form,"Wpn"+(i+1)+" Damage",`${dmg} ${dmgType}`);
+
+const hit = atk.system.attackBonus || "";
+safeSet(form,"Wpn"+(i+1)+" AtkBonus",hit);
+```
 
 }
 
-.sheet{
+/* ─────────────────────────
+SPELLCASTING
+───────────────────────── */
 
-width:900px;
-margin:auto;
-border:3px solid black;
-padding:20px;
+safeSet(form,"SpellcastingAbility",sys.attributes.spellcasting);
 
-}
+/* SPELL SLOTS */
 
-.header{
+if(sys.spells){
 
-display:flex;
-gap:20px;
-align-items:center;
+```
+Object.entries(sys.spells).forEach(([lvl,data])=>{
 
-}
+  if(lvl==="pact") return;
 
-.portrait{
+  const level = lvl.replace("spell","");
 
-width:150px;
-border:2px solid black;
+  safeSet(form,"SpellSlots"+level,data.max);
+  safeSet(form,"SpellSlots"+level+"Remaining",data.value);
 
-}
-
-.name{
-
-font-size:32px;
-font-weight:bold;
+});
+```
 
 }
 
-.topstats{
+/* ─────────────────────────
+SPELL LIST PAGE 2
+───────────────────────── */
 
-margin-top:10px;
+const spells = actor.items.filter(i => i.type==="spell");
 
+spells.slice(0,30).forEach((spell,i)=>{
+
+```
+const idx = i+1;
+
+safeSet(form,"Spell "+idx,spell.name);
+safeSet(form,"SpellLevel "+idx,spell.system.level);
+
+if(spell.system.preparation?.prepared){
+  safeCheck(form,"Prepared "+idx,true);
 }
+```
 
-.abilities{
+});
 
-display:grid;
-grid-template-columns:repeat(6,1fr);
-gap:10px;
-margin-top:20px;
+/* ─────────────────────────
+FEATURES / TRAITS
+───────────────────────── */
 
-}
+const features = actor.items
+.filter(i=>i.type==="feat")
+.map(i=>i.name)
+.join(", ");
 
-.ability{
+safeSet(form,"Features and Traits",features);
 
-border:2px solid black;
-padding:10px;
-text-align:center;
-font-size:18px;
+/* ─────────────────────────
+EQUIPMENT / INVENTORY
+───────────────────────── */
 
-}
+const equipment = actor.items
+.filter(i=>["equipment","weapon","tool","consumable","loot"].includes(i.type))
+.map(i=>`${i.name} x${i.system.quantity || 1}`)
+.join(", ");
 
-.section{
+safeSet(form,"Equipment",equipment);
 
-border:2px solid black;
-padding:15px;
-margin-top:20px;
+/* ─────────────────────────
+SAVE PDF
+───────────────────────── */
 
-}
+const pdfBytes = await pdfDoc.save();
 
-.section h2{
+const blob = new Blob([pdfBytes], {type:"application/pdf"});
 
-margin-top:0;
-border-bottom:1px solid black;
+const link = document.createElement("a");
 
-}
+link.href = URL.createObjectURL(blob);
 
-.columns{
+link.download = actor.name + "-character-sheet.pdf";
 
-columns:2;
-
-}
-
-.card{
-
-border:2px solid black;
-padding:10px;
-margin:5px;
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="sheet">
-
-<div class="header">
-
-<img src="${actor.img}" class="portrait">
-
-<div>
-
-<div class="name">${actor.name}</div>
-
-<div class="topstats">
-
-AC ${sys.attributes.ac.value}
-HP ${sys.attributes.hp.value}/${sys.attributes.hp.max}
-Speed ${sys.attributes.movement.walk}
-
-</div>
-
-</div>
-
-</div>
-
-<div class="abilities">
-
-${Object.entries(sys.abilities).map(([k,v])=>{
-
-let mod = abilityMod(v.value);
-
-return `
-
-<div class="ability">
-
-${k.toUpperCase()} <br>
-
-${v.value}
-(${mod>=0?"+":""}${mod})
-
-</div>
-
-`
-
-}).join("")}
-
-</div>
-
-<div class="section">
-
-<h2>Skills</h2>
-
-<div class="columns">
-
-${Object.entries(sys.skills)
-.map(([k,v])=>`${k.toUpperCase()} +${v.total}`)
-.join("<br>")}
-
-</div>
-
-</div>
-
-<div class="section">
-
-<h2>Attacks</h2>
-
-${actor.items
-.filter(i=>i.system?.damage?.parts?.length)
-.map(i=>`<div>${i.name}</div>`)
-.join("")}
-
-</div>
-
-<div class="section">
-
-<h2>Spells</h2>
-
-${actor.items
-.filter(i=>i.type==="spell")
-.map(i=>`<div>${i.name}</div>`)
-.join("")}
-
-</div>
-
-<div class="section">
-
-<h2>Equipment</h2>
-
-${actor.items
-.filter(i=>i.type==="equipment")
-.map(i=>`<div>${i.name}</div>`)
-.join("")}
-
-</div>
-
-</div>
-
-</body>
-
-</html>
-
-`;
-
-openPrintable(html)
-
-}
-
-function exportSpellCards(actor){
-
-let spells = actor.items.filter(i=>i.type==="spell")
-
-let html = `
-
-<html>
-
-<style>
-
-.card{
-
-border:2px solid black;
-width:260px;
-padding:10px;
-margin:10px;
-display:inline-block;
-
-}
-
-</style>
-
-<body>
-
-${spells.map(s=>`
-
-<div class="card">
-
-<h3>\${s.name}</h3>
-
-Level ${s.system.level}
-
-${s.system.description.value}
-
-</div>
-
-`).join("")}
-
-</body>
-
-</html>
-
-`
-
-openPrintable(html)
-
-}
-
-function exportInventory(actor){
-
-let items = actor.items.filter(i=>i.type==="equipment")
-
-let html = `
-
-<html>
-
-<style>
-
-.card{
-
-border:2px solid black;
-width:260px;
-padding:10px;
-margin:10px;
-display:inline-block;
-
-}
-
-</style>
-
-<body>
-
-${items.map(i=>`
-
-<div class="card">
-
-<h3>\${i.name}</h3>
-
-${i.system.description?.value || ""}
-
-</div>
-
-`).join("")}
-
-</body>
-
-</html>
-
-`
-
-openPrintable(html)
-
-}
-
-function exportStatblock(actor){
-
-const sys = actor.system
-
-let html = `
-
-<html>
-
-<body style="font-family:serif">
-
-<h1>\${actor.name}</h1>
-
-AC ${sys.attributes.ac.value}<br>
-
-HP ${sys.attributes.hp.value}<br>
-
-STR ${sys.abilities.str.value}<br>
-DEX ${sys.abilities.dex.value}<br>
-CON ${sys.abilities.con.value}<br>
-INT ${sys.abilities.int.value}<br>
-WIS ${sys.abilities.wis.value}<br>
-CHA ${sys.abilities.cha.value}
-
-</body>
-
-</html>
-
-`
-
-openPrintable(html)
-
-}
-
-function exportParty(){
-
-let chars = game.actors.filter(a=>a.type==="character")
-
-let html = `
-
-<html>
-
-<body>
-
-${chars.map(c=>`<h2>${c.name}</h2>`).join("")}
-
-</body>
-
-</html>
-
-`
-
-openPrintable(html)
+link.click();
 
 }
