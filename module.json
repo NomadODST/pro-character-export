@@ -1,25 +1,29 @@
 {
   "id": "pro-character-export",
   "title": "Pro Character Export",
-  "description": "Professional DnD5e character export tool",
-  "version": "2.0.0",
+  "description": "Professional character export tool for DnD5e",
+  "version": "3.5",
+
   "authors": [
     {
       "name": "DM Toolkit"
     }
   ],
+
   "compatibility": {
-  "minimum": "10",
-  "verified": "12",
-  "maximum": "12"
-	},
+    "minimum": "11",
+    "verified": "12"
+  },
+
   "scripts": [
-	"pdf-lib.min.js",
+    "pdf-lib.min.js",
     "exporter.js"
   ],
+
   "styles": [
     "styles/sheet.css"
   ],
+
   "relationships": {
     "systems": [
       {
@@ -29,7 +33,9 @@
     ]
   },
 
-"url": "https://github.com/NomadODST/pro-character-export",
-"manifest": "https://raw.githubusercontent.com/NomadODST/pro-character-export/main/module.json",
-"download": "https://github.com/NomadODST/pro-character-export/archive/refs/heads/main.zip"
+  "url": "https://github.com/NomadODST/pro-character-export",
+
+  "manifest": "https://raw.githubusercontent.com/NomadODST/pro-character-export/main/module.json",
+
+  "download": "https://github.com/NomadODST/pro-character-export/archive/refs/heads/main.zip"
 }
