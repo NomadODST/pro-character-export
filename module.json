@@ -22,6 +22,7 @@
     "scripts/item-parser.js",
     "scripts/multi-page.js",
     "scripts/pdf-utils.js",
+    "scripts/spell-exporter.js",
     "exporter.js"
   ],
 
