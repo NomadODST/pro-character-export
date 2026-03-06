@@ -1,10 +1,10 @@
-export function parseActorItems(actor){
+function parseActorItems(actor){
 
-const weapons = [];
-const spells = [];
-const feats = [];
-const equipment = [];
-const tools = [];
+const weapons=[];
+const spells=[];
+const feats=[];
+const equipment=[];
+const tools=[];
 
 for(const item of actor.items){
 
@@ -25,7 +25,7 @@ break;
 case "equipment":
 case "loot":
 case "consumable":
-equipment.push(`${item.name} x${item.system.quantity || 1}`);
+equipment.push(`${item.name} x${item.system.quantity||1}`);
 break;
 
 case "tool":
@@ -38,7 +38,7 @@ break;
 
 spells.sort((a,b)=>a.level-b.level);
 
-return {
+return{
 weapons,
 spells,
 feats,
@@ -50,34 +50,36 @@ tools
 
 function parseWeapon(actor,item){
 
-const sys = actor.system;
+const ability=item.system.abilityMod||"str";
 
-const ability = item.system.abilityMod || "str";
+const mod=actor.system.abilities[ability].mod;
 
-const mod = sys.abilities[ability].mod;
+const prof=item.system.proficient?actor.system.attributes.prof:0;
 
-const prof = item.system.proficient ? sys.attributes.prof : 0;
+const magic=Number(item.system.attackBonus||0);
 
-const magic = Number(item.system.attackBonus || 0);
+const attack=mod+prof+magic;
 
-const attackBonus = mod + prof + magic;
+const dmg=item.system.damage.parts?.[0];
 
-const dmg = item.system.damage.parts?.[0];
+return{
 
-return {
 name:item.name,
-attack:attackBonus,
-damage: dmg ? `${dmg[0]} ${dmg[1]}` : ""
+attack,
+damage:dmg?`${dmg[0]} ${dmg[1]}`:""
+
 };
 
 }
 
 function parseSpell(item){
 
-return {
+return{
+
 name:item.name,
 level:item.system.level,
 prepared:item.system.preparation?.prepared
+
 };
 
 }
