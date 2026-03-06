@@ -1,106 +1,209 @@
-Hooks.on("renderActorSheet5eCharacter", addExportButton);
 Hooks.on("renderActorSheet", addExportButton);
+Hooks.on("renderActorSheet5eCharacter", addExportButton);
+
+
+/* ===============================
+   BUTTON CREATION (ROBUST)
+================================ */
 
 function addExportButton(app, html) {
 
-  if (!app.actor || app.actor.type !== "character") return;
+  try {
 
-  if (html.find(".pro-export").length) return;
+    if (!app.actor) return;
 
-  const btn = $(`<a class="pro-export"><i class="fas fa-file-pdf"></i> Export PDF</a>`);
+    if (app.actor.type !== "character") return;
 
-  btn.on("click", () => exportCharacterPDF(app.actor));
+    if (html.find(".pro-export").length) return;
 
-  html.closest(".app").find(".window-title").after(btn);
+    const btn = $(
+      `<a class="pro-export"><i class="fas fa-file-pdf"></i> Export PDF</a>`
+    );
+
+    btn.on("click", () => exportCharacterPDF(app.actor));
+
+    const appElement = html.closest(".app");
+
+    if (!appElement.length) return;
+
+    const headerActions = appElement.find(".window-header .header-actions");
+
+    if (headerActions.length) {
+
+      headerActions.append(btn);
+
+      return;
+
+    }
+
+    const header = appElement.find(".window-header");
+
+    if (header.length) {
+
+      header.append(btn);
+
+      return;
+
+    }
+
+    console.warn("Pro Character Export: could not find header location.");
+
+  } catch (err) {
+
+    console.error("Pro Character Export button error:", err);
+
+  }
 
 }
+
+
+/* ===============================
+   EXPORT FUNCTION
+================================ */
 
 async function exportCharacterPDF(actor) {
 
-  if (game.user.isGM) {
+  try {
 
-    console.log("Run scanPDFFIelds() in console to list all PDF fields.");
+    if (game.user.isGM) {
 
-  }
-  
-  const mapping = await fetch(
-    "modules/pro-character-export/mappings/official-5e.json"
-  ).then(r => r.json());
+      console.log(
+        "Pro Character Export: run scanPDFFIelds() in console to list PDF fields."
+      );
 
-  const pdfBytes = await fetch(
-    "modules/pro-character-export/templates/5e-character-sheet.pdf"
-  ).then(r => r.arrayBuffer());
+    }
 
-  const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+    const mapping = await fetch(
+      "modules/pro-character-export/mappings/official-5e.json"
+    ).then(r => r.json());
 
-  const form = pdfDoc.getForm();
+    const pdfBytes = await fetch(
+      "modules/pro-character-export/templates/5e-character-sheet.pdf"
+    ).then(r => r.arrayBuffer());
 
-  const pdfFields = form.getFields().map(f => f.getName());
+    const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
 
-  const parsed = parseActorItems(actor);
+    const form = pdfDoc.getForm();
 
-  for (const field of mapping.fields) {
+    const pdfFields = form.getFields().map(f => f.getName());
 
-    try {
+    const parsed = parseActorItems(actor);
 
-      if (!pdfFields.includes(field.pdf)) continue;
+    /* ===============================
+       FIELD MAPPING
+    ================================ */
 
-      const value = resolveFoundryPath(actor, field.source, parsed);
+    for (const field of mapping.fields) {
 
-      if (field.type === "checkbox") {
+      try {
 
-        if (value) form.getCheckBox(field.pdf).check();
+        if (!pdfFields.includes(field.pdf)) continue;
 
-      } else {
+        const value = resolveFoundryPath(actor, field.source, parsed);
 
-        form.getTextField(field.pdf).setText(String(value ?? ""));
+        if (field.type === "checkbox") {
+
+          if (value) form.getCheckBox(field.pdf).check();
+
+        } else {
+
+          form.getTextField(field.pdf).setText(String(value ?? ""));
+
+        }
+
+      } catch (e) {
+
+        console.warn("Mapping error:", field.pdf, e);
 
       }
 
-    } catch (e) {}
+    }
+
+    /* ===============================
+       WEAPONS
+    ================================ */
+
+    fillWeapons(form, parsed.weapons);
+
+    /* ===============================
+       FEATURES
+    ================================ */
+
+    fillFeatures(form, parsed.feats);
+
+    /* ===============================
+       INVENTORY
+    ================================ */
+
+    fillInventory(form, parsed.equipment);
+
+    /* ===============================
+       SPELLS
+    ================================ */
+
+    fillSpells(form, parsed.spells);
+
+    /* ===============================
+       SAVE PDF
+    ================================ */
+
+    const finalPdf = await pdfDoc.save();
+
+    const blob = new Blob([finalPdf], { type: "application/pdf" });
+
+    const link = document.createElement("a");
+
+    link.href = URL.createObjectURL(blob);
+
+    link.download = actor.name + "-character-sheet.pdf";
+
+    link.click();
+
+  } catch (err) {
+
+    console.error("Pro Character Export failed:", err);
 
   }
-
-  fillWeapons(form, parsed.weapons);
-
-  fillFeatures(form, parsed.feats);
-
-  fillInventory(form, parsed.equipment);
-
-  fillSpells(form, parsed.spells);
-
-  const finalPdf = await pdfDoc.save();
-
-  const blob = new Blob([finalPdf], { type: "application/pdf" });
-
-  const link = document.createElement("a");
-
-  link.href = URL.createObjectURL(blob);
-
-  link.download = actor.name + "-character-sheet.pdf";
-
-  link.click();
 
 }
 
-function resolveFoundryPath(actor, path) {
 
-  if (!path) return "";
+/* ===============================
+   PATH RESOLVER
+================================ */
 
-  if (path === "game.user.name") return game.user.name;
+function resolveFoundryPath(actor, path, parsed) {
 
-  const parts = path.split(".");
+  try {
 
-  let obj = actor;
+    if (!path) return "";
 
-  for (const p of parts) {
+    if (path === "game.user.name") return game.user.name;
 
-    if (obj == null) return "";
+    if (path === "items[type=weapon]") return parsed.weapons;
 
-    obj = obj[p];
+    if (path === "items[type=spell]") return parsed.spells;
+
+    if (path === "items[type=feat]") return parsed.feats;
+
+    const parts = path.split(".");
+
+    let obj = actor;
+
+    for (const p of parts) {
+
+      if (obj == null) return "";
+
+      obj = obj[p];
+
+    }
+
+    return obj;
+
+  } catch {
+
+    return "";
 
   }
-
-  return obj;
 
 }
