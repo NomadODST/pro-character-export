@@ -1,6 +1,6 @@
-export function splitIntoPages(list,pageSize){
+function splitIntoPages(list,pageSize){
 
-const pages = [];
+const pages=[];
 
 for(let i=0;i<list.length;i+=pageSize){
 
