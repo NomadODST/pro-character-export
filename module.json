@@ -1,34 +1,29 @@
 {
   "id": "pro-character-export",
   "title": "Pro Character Export",
-  "description": "Export Foundry characters to the official 5E character sheet PDF",
-  "version": "4.5",
+  "description": "Advanced Character Sheet PDF Exporter",
+  "version": "6.0.0",
   "authors": [
     {
-      "name": "NomadODST"
+      "name": "Pro Export Dev"
     }
   ],
-
   "compatibility": {
     "minimum": "11",
     "verified": "12"
   },
-
   "scripts": [
     "pdf-lib.min.js",
+    "scripts/item-parser.js",
+    "scripts/multi-page.js",
+    "scripts/pdf-utils.js",
     "exporter.js"
   ],
-
-  "relationships": {
-    "systems": [
-      {
-        "id": "dnd5e",
-        "type": "system"
-      }
-    ]
-  },
-
-  "url": "https://github.com/NomadODST/pro-character-export",
-  "manifest": "https://raw.githubusercontent.com/NomadODST/pro-character-export/main/module.json",
-  "download": "https://github.com/NomadODST/pro-character-export/archive/refs/heads/main.zip"
+  "esmodules": [],
+  "styles": [],
+  "packs": [],
+  "system": ["dnd5e"],
+  "url": "",
+  "manifest": "",
+  "download": ""
 }
