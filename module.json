@@ -1,8 +1,8 @@
 {
   "id": "pro-character-export",
   "title": "Pro Character Export",
-  "description": "Complete D&D 5e Character Sheet PDF exporter",
-  "version": "6.2.0",
+  "description": "Complete D&D 5e Character Sheet PDF exporter with auto field scanner",
+  "version": "6.3.0",
 
   "authors": [
     { "name": "NomadODST" }
@@ -18,13 +18,16 @@
   "scripts": [
     "https://unpkg.com/pdf-lib/dist/pdf-lib.min.js",
     "scripts/item-parser.js",
-    "scripts/multi-page.js",
     "scripts/pdf-utils.js",
     "scripts/spell-exporter.js",
+    "scripts/multi-page.js",
+    "scripts/pdf-field-scanner.js",
     "exporter.js"
   ],
 
   "url": "https://github.com/NomadODST/pro-character-export",
+
   "manifest": "https://raw.githubusercontent.com/NomadODST/pro-character-export/main/module.json",
+
   "download": "https://github.com/NomadODST/pro-character-export/archive/refs/heads/main.zip"
 }
