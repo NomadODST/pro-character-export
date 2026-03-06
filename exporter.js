@@ -17,6 +17,12 @@ function addExportButton(app, html) {
 
 async function exportCharacterPDF(actor) {
 
+  if (game.user.isGM) {
+
+    console.log("Run scanPDFFIelds() in console to list all PDF fields.");
+
+  }
+  
   const mapping = await fetch(
     "modules/pro-character-export/mappings/official-5e.json"
   ).then(r => r.json());
