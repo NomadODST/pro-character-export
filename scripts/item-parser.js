@@ -114,7 +114,7 @@ function parseSpell(item) {
     name: item.name,
     level: item.system.level,
     school: item.system.school,
-    prepared: item.system.preparation?.prepared
+    prepared: item.system.preparation?.prepared || false
 
   };
 
