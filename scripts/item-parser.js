@@ -5,6 +5,7 @@ window.parseActorItems = function parseActorItems(actor) {
   const feats = [];
   const equipment = [];
   const tools = [];
+  const armor = [];
 
   for (const item of actor.items) {
 
@@ -23,13 +24,41 @@ window.parseActorItems = function parseActorItems(actor) {
         break;
 
       case "equipment":
-      case "loot":
+
+        if (item.system.armor) {
+          armor.push(item.name);
+        }
+
+        equipment.push({
+          name: item.name,
+          qty: item.system.quantity || 1,
+          weight: item.system.weight || 0
+        });
+
+        break;
+
       case "consumable":
-        equipment.push(`${item.name} x${item.system.quantity || 1}`);
+
+        equipment.push({
+          name: item.name,
+          qty: item.system.quantity || 1
+        });
+
         break;
 
       case "tool":
+
         tools.push(item.name);
+
+        break;
+
+      case "loot":
+
+        equipment.push({
+          name: item.name,
+          qty: item.system.quantity || 1
+        });
+
         break;
 
     }
@@ -43,7 +72,8 @@ window.parseActorItems = function parseActorItems(actor) {
     spells,
     feats,
     equipment,
-    tools
+    tools,
+    armor
   };
 
 }
@@ -55,7 +85,9 @@ function parseWeapon(actor, item) {
 
   const mod = actor.system.abilities[ability].mod;
 
-  const prof = item.system.proficient ? actor.system.attributes.prof : 0;
+  const prof = item.system.proficient
+    ? actor.system.attributes.prof
+    : 0;
 
   const magic = Number(item.system.attackBonus || 0);
 
@@ -67,7 +99,8 @@ function parseWeapon(actor, item) {
 
     name: item.name,
     attack,
-    damage: dmg ? `${dmg[0]} ${dmg[1]}` : ""
+    damage: dmg ? dmg[0] : "",
+    damageType: dmg ? dmg[1] : ""
 
   };
 
@@ -80,6 +113,7 @@ function parseSpell(item) {
 
     name: item.name,
     level: item.system.level,
+    school: item.system.school,
     prepared: item.system.preparation?.prepared
 
   };
