@@ -1,107 +1,111 @@
-Hooks.on("renderActorSheet5eCharacter",(app,html)=>{
+Hooks.on("renderActorSheet5eCharacter", (app, html) => {
 
-if(!app.actor || app.actor.type!=="character") return;
+  if (!app.actor || app.actor.type !== "character") return;
 
-if(html.find(".pro-export").length) return;
+  if (html.find(".pro-export").length) return;
 
-const btn = $(`<a class="pro-export"><i class="fas fa-file-pdf"></i> Export PDF</a>`);
+  const btn = $(`<a class="pro-export"><i class="fas fa-file-pdf"></i> Export PDF</a>`);
 
-btn.click(()=>exportCharacterPDF(app.actor));
+  btn.click(() => exportCharacterPDF(app.actor));
 
-html.closest(".app").find(".window-title").after(btn);
+  html.closest(".app").find(".window-title").after(btn);
 
 });
 
-async function exportCharacterPDF(actor){
 
-const mapping = await fetch(
-"modules/pro-character-export/mappings/official-5e.json"
-).then(r=>r.json());
+async function exportCharacterPDF(actor) {
 
-const pdfBytes = await fetch(
-"modules/pro-character-export/templates/5e-character-sheet.pdf"
-).then(r=>r.arrayBuffer());
+  const mapping = await fetch(
+    "modules/pro-character-export/mappings/official-5e.json"
+  ).then(r => r.json());
 
-const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+  const pdfBytes = await fetch(
+    "modules/pro-character-export/templates/5e-character-sheet.pdf"
+  ).then(r => r.arrayBuffer());
 
-const form = pdfDoc.getForm();
+  const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
 
-const parsed = parseActorItems(actor);
+  const form = pdfDoc.getForm();
 
-for(const field of mapping.fields){
+  const pdfFields = form.getFields().map(f => f.getName());
 
-try{
+  const parsed = parseActorItems(actor);
 
-const value = resolveFoundryPath(actor,field.source,parsed);
+  for (const field of mapping.fields) {
 
-if(field.type==="checkbox"){
+    try {
 
-if(value) form.getCheckBox(field.pdf).check();
+      if (!pdfFields.includes(field.pdf)) continue;
 
-}else{
+      const value = resolveFoundryPath(actor, field.source, parsed);
 
-form.getTextField(field.pdf).setText(String(value ?? ""));
+      if (field.type === "checkbox") {
 
-}
+        if (value) form.getCheckBox(field.pdf).check();
 
-}catch(e){}
+      } else {
 
-}
+        form.getTextField(field.pdf).setText(String(value ?? ""));
 
-/* SPELL MULTI PAGE */
+      }
 
-const spellPages = splitIntoPages(parsed.spells,45);
+    } catch (e) { }
 
-for(let i=1;i<spellPages.length;i++){
+  }
 
-const pages = await pdfDoc.copyPages(pdfDoc,[2]);
+  const spellPages = splitIntoPages(parsed.spells, 45);
 
-pdfDoc.addPage(pages[0]);
+  for (let i = 1; i < spellPages.length; i++) {
 
-}
+    const templateIndex = 2;
 
-/* WEAPON PAGE */
+    const copied = await pdfDoc.copyPages(pdfDoc, [templateIndex]);
 
-fillWeapons(form,parsed.weapons);
+    pdfDoc.addPage(copied[0]);
 
-/* FEATURES */
+  }
 
-fillFeatures(form,parsed.feats);
+  fillWeapons(form, parsed.weapons);
 
-const finalPdf = await pdfDoc.save();
+  fillFeatures(form, parsed.feats);
 
-const blob = new Blob([finalPdf],{type:"application/pdf"});
+  const finalPdf = await pdfDoc.save();
 
-const link = document.createElement("a");
+  const blob = new Blob([finalPdf], { type: "application/pdf" });
 
-link.href = URL.createObjectURL(blob);
+  const link = document.createElement("a");
 
-link.download = actor.name+"-character-sheet.pdf";
+  link.href = URL.createObjectURL(blob);
 
-link.click();
+  link.download = actor.name + "-character-sheet.pdf";
 
-}
-
-function resolveFoundryPath(actor,path,parsed){
-
-if(!path) return "";
-
-if(path==="items[type=weapon]") return parsed.weapons;
-if(path==="items[type=spell]") return parsed.spells;
-if(path==="items[type=feat]") return parsed.feats;
-
-const parts = path.split(".");
-
-let obj = actor;
-
-for(const p of parts){
-
-if(obj==null) return "";
-
-obj = obj[p];
+  link.click();
 
 }
 
-return obj;
+
+function resolveFoundryPath(actor, path, parsed) {
+
+  if (!path) return "";
+
+  if (path === "game.user.name") return game.user.name;
+
+  if (path === "items[type=weapon]") return parsed.weapons;
+  if (path === "items[type=spell]") return parsed.spells;
+  if (path === "items[type=feat]") return parsed.feats;
+
+  const parts = path.split(".");
+
+  let obj = actor;
+
+  for (const p of parts) {
+
+    if (obj == null) return "";
+
+    obj = obj[p];
+
+  }
+
+  return obj;
 
 }
