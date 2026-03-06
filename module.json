@@ -18,12 +18,12 @@
   "system": ["dnd5e"],
 
   "scripts": [
-    "pdf-lib.min.js",
-    "scripts/item-parser.js",
-    "scripts/multi-page.js",
-    "scripts/pdf-utils.js",
-    "exporter.js"
-  ],
+  "pdf-lib.min.js",
+  "scripts/item-parser.js",
+  "scripts/multi-page.js",
+  "scripts/pdf-utils.js",
+  "exporter.js"
+],
 
   "url": "https://github.com/NomadODST/pro-character-export",
 
