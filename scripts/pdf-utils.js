@@ -1,33 +1,34 @@
-function fillWeapons(form,weapons){
+window.fillWeapons = function fillWeapons(form, weapons) {
 
-for(let i=0;i<weapons.length && i<6;i++){
+  for (let i = 0; i < weapons.length && i < 6; i++) {
 
-const w=weapons[i];
+    const w = weapons[i];
 
-const idx=i+1;
+    const idx = i + 1;
 
-try{
+    try {
 
-form.getTextField("Wpn Name"+idx).setText(w.name);
+      form.getTextField("Wpn Name" + idx).setText(w.name);
 
-form.getTextField("Wpn"+idx+" AtkBonus").setText(w.attack);
+      form.getTextField("Wpn" + idx + " AtkBonus").setText(w.attack);
 
-form.getTextField("Wpn"+idx+" Damage").setText(w.damage);
+      form.getTextField("Wpn" + idx + " Damage").setText(w.damage);
 
-}catch(e){}
+    } catch (e) { }
+
+  }
 
 }
 
-}
 
-function fillFeatures(form,features){
+window.fillFeatures = function fillFeatures(form, features) {
 
-const text=features.join(", ");
+  const text = features.join(", ");
 
-try{
+  try {
 
-form.getTextField("Features and Traits").setText(text);
+    form.getTextField("Features and Traits").setText(text);
 
-}catch(e){}
+  } catch (e) { }
 
 }
