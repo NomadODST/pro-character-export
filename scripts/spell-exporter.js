@@ -1,8 +1,8 @@
 window.fillSpells = function fillSpells(form, spells) {
 
-  const spellFields = 45;
+  const maxSpells = 45;
 
-  for (let i = 0; i < spells.length && i < spellFields; i++) {
+  for (let i = 0; i < spells.length && i < maxSpells; i++) {
 
     const spell = spells[i];
 
@@ -16,9 +16,7 @@ window.fillSpells = function fillSpells(form, spells) {
 
       if (spell.prepared) {
 
-        try {
-          form.getCheckBox("Prepared" + idx).check();
-        } catch (e) {}
+        form.getCheckBox("Prepared" + idx).check();
 
       }
 
