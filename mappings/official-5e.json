@@ -1,1 +1,96 @@
-1
+{
+ "pdf":"official-5e",
+ "fields":[
+
+{"pdf":"CharacterName","source":"name"},
+{"pdf":"PlayerName","source":"game.user.name"},
+
+{"pdf":"Race","source":"system.details.race"},
+{"pdf":"ClassLevel","source":"system.details.level"},
+{"pdf":"Background","source":"system.details.background"},
+{"pdf":"Alignment","source":"system.details.alignment"},
+{"pdf":"XP","source":"system.details.xp.value"},
+
+{"pdf":"STR","source":"system.abilities.str.value"},
+{"pdf":"DEX","source":"system.abilities.dex.value"},
+{"pdf":"CON","source":"system.abilities.con.value"},
+{"pdf":"INT","source":"system.abilities.int.value"},
+{"pdf":"WIS","source":"system.abilities.wis.value"},
+{"pdf":"CHA","source":"system.abilities.cha.value"},
+
+{"pdf":"STRmod","source":"system.abilities.str.mod"},
+{"pdf":"DEXmod","source":"system.abilities.dex.mod"},
+{"pdf":"CONmod","source":"system.abilities.con.mod"},
+{"pdf":"INTmod","source":"system.abilities.int.mod"},
+{"pdf":"WISmod","source":"system.abilities.wis.mod"},
+{"pdf":"CHAmod","source":"system.abilities.cha.mod"},
+
+{"pdf":"ST STR","source":"system.abilities.str.save"},
+{"pdf":"ST DEX","source":"system.abilities.dex.save"},
+{"pdf":"ST CON","source":"system.abilities.con.save"},
+{"pdf":"ST INT","source":"system.abilities.int.save"},
+{"pdf":"ST WIS","source":"system.abilities.wis.save"},
+{"pdf":"ST CHA","source":"system.abilities.cha.save"},
+
+{"pdf":"ST STR Prof","source":"system.abilities.str.proficient","type":"checkbox"},
+{"pdf":"ST DEX Prof","source":"system.abilities.dex.proficient","type":"checkbox"},
+{"pdf":"ST CON Prof","source":"system.abilities.con.proficient","type":"checkbox"},
+{"pdf":"ST INT Prof","source":"system.abilities.int.proficient","type":"checkbox"},
+{"pdf":"ST WIS Prof","source":"system.abilities.wis.proficient","type":"checkbox"},
+{"pdf":"ST CHA Prof","source":"system.abilities.cha.proficient","type":"checkbox"},
+
+{"pdf":"Acrobatics","source":"system.skills.acr.total"},
+{"pdf":"AnimalHandling","source":"system.skills.ani.total"},
+{"pdf":"Arcana","source":"system.skills.arc.total"},
+{"pdf":"Athletics","source":"system.skills.ath.total"},
+{"pdf":"Deception","source":"system.skills.dec.total"},
+{"pdf":"History","source":"system.skills.his.total"},
+{"pdf":"Insight","source":"system.skills.ins.total"},
+{"pdf":"Intimidation","source":"system.skills.itm.total"},
+{"pdf":"Investigation","source":"system.skills.inv.total"},
+{"pdf":"Medicine","source":"system.skills.med.total"},
+{"pdf":"Nature","source":"system.skills.nat.total"},
+{"pdf":"Perception","source":"system.skills.prc.total"},
+{"pdf":"Performance","source":"system.skills.prf.total"},
+{"pdf":"Persuasion","source":"system.skills.per.total"},
+{"pdf":"Religion","source":"system.skills.rel.total"},
+{"pdf":"SleightOfHand","source":"system.skills.slt.total"},
+{"pdf":"Stealth","source":"system.skills.ste.total"},
+{"pdf":"Survival","source":"system.skills.sur.total"},
+
+{"pdf":"PassivePerception","source":"system.skills.prc.passive"},
+{"pdf":"PassiveInvestigation","source":"system.skills.inv.passive"},
+{"pdf":"PassiveInsight","source":"system.skills.ins.passive"},
+
+{"pdf":"ArmorClass","source":"system.attributes.ac.value"},
+{"pdf":"Initiative","source":"system.attributes.init.total"},
+{"pdf":"Speed","source":"system.attributes.movement.walk"},
+
+{"pdf":"HPMax","source":"system.attributes.hp.max"},
+{"pdf":"HPCurrent","source":"system.attributes.hp.value"},
+{"pdf":"TempHP","source":"system.attributes.hp.temp"},
+
+{"pdf":"HitDiceTotal","source":"system.attributes.hd"},
+{"pdf":"HitDiceRemaining","source":"system.attributes.hd"},
+
+{"pdf":"SpellcastingAbility","source":"system.attributes.spellcasting"},
+{"pdf":"SpellSaveDC","source":"system.attributes.spelldc"},
+
+{"pdf":"CP","source":"system.currency.cp"},
+{"pdf":"SP","source":"system.currency.sp"},
+{"pdf":"EP","source":"system.currency.ep"},
+{"pdf":"GP","source":"system.currency.gp"},
+{"pdf":"PP","source":"system.currency.pp"},
+
+{"pdf":"PersonalityTraits","source":"system.details.trait"},
+{"pdf":"Ideals","source":"system.details.ideal"},
+{"pdf":"Bonds","source":"system.details.bond"},
+{"pdf":"Flaws","source":"system.details.flaw"},
+
+{"pdf":"Languages","source":"system.traits.languages.value"},
+{"pdf":"ToolProficiencies","source":"items[type=tool]"},
+
+{"pdf":"Equipment","source":"items[type=equipment]"}
+
+ ]
+}
