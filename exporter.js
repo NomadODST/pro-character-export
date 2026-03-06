@@ -1,4 +1,8 @@
-Hooks.on("renderActorSheet5eCharacter", (app, html) => {
+Hooks.on("renderActorSheet5eCharacter", addExportButton);
+Hooks.on("renderActorSheet", addExportButton);
+
+
+function addExportButton(app, html) {
 
   if (!app.actor || app.actor.type !== "character") return;
 
@@ -6,14 +10,16 @@ Hooks.on("renderActorSheet5eCharacter", (app, html) => {
 
   const btn = $(`<a class="pro-export"><i class="fas fa-file-pdf"></i> Export PDF</a>`);
 
-  btn.click(() => exportCharacterPDF(app.actor));
+  btn.on("click", () => exportCharacterPDF(app.actor));
 
   html.closest(".app").find(".window-title").after(btn);
 
-});
+}
 
 
 async function exportCharacterPDF(actor) {
+
+  console.log("Pro Character Export gestartet", actor);
 
   const mapping = await fetch(
     "modules/pro-character-export/mappings/official-5e.json"
@@ -49,7 +55,9 @@ async function exportCharacterPDF(actor) {
 
       }
 
-    } catch (e) { }
+    } catch (e) {
+      console.warn("Export Feld Fehler:", field.pdf, e);
+    }
 
   }
 
