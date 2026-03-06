@@ -1,14 +1,17 @@
 {
   "pdf": "official-5e",
-  "version": "6.0",
+  "version": "6.1",
+
   "fields": [
 
     { "pdf": "CharacterName", "source": "name" },
     { "pdf": "PlayerName", "source": "game.user.name" },
 
+    { "pdf": "ClassLevel", "source": "system.details.level" },
     { "pdf": "Race", "source": "system.details.race" },
     { "pdf": "Background", "source": "system.details.background" },
     { "pdf": "Alignment", "source": "system.details.alignment" },
+
     { "pdf": "XP", "source": "system.details.xp.value" },
 
     { "pdf": "STR", "source": "system.abilities.str.value" },
@@ -33,6 +36,10 @@
     { "pdf": "HPCurrent", "source": "system.attributes.hp.value" },
     { "pdf": "TempHP", "source": "system.attributes.hp.temp" },
 
+    { "pdf": "ProfBonus", "source": "system.attributes.prof" },
+
+    { "pdf": "SpellSaveDC", "source": "system.attributes.spelldc" },
+
     { "pdf": "CP", "source": "system.currency.cp" },
     { "pdf": "SP", "source": "system.currency.sp" },
     { "pdf": "EP", "source": "system.currency.ep" },
@@ -45,4 +52,5 @@
     { "pdf": "Flaws", "source": "system.details.flaw" }
 
   ]
+
 }
