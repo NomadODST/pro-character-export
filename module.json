@@ -2,7 +2,7 @@
   "id": "pro-character-export",
   "title": "Pro Character Export",
   "description": "Advanced Character Sheet PDF Exporter",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "authors": [
     {
       "name": "Pro Export Dev"
@@ -19,11 +19,5 @@
     "scripts/pdf-utils.js",
     "exporter.js"
   ],
-  "esmodules": [],
-  "styles": [],
-  "packs": [],
-  "system": ["dnd5e"],
-  "url": "",
-  "manifest": "",
-  "download": ""
+  "system": ["dnd5e"]
 }
