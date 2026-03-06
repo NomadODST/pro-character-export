@@ -1,7 +1,6 @@
 Hooks.on("renderActorSheet5eCharacter", addExportButton);
 Hooks.on("renderActorSheet", addExportButton);
 
-
 function addExportButton(app, html) {
 
   if (!app.actor || app.actor.type !== "character") return;
@@ -16,10 +15,7 @@ function addExportButton(app, html) {
 
 }
 
-
 async function exportCharacterPDF(actor) {
-
-  console.log("Pro Character Export gestartet", actor);
 
   const mapping = await fetch(
     "modules/pro-character-export/mappings/official-5e.json"
@@ -55,27 +51,15 @@ async function exportCharacterPDF(actor) {
 
       }
 
-    } catch (e) {
-      console.warn("Export Feld Fehler:", field.pdf, e);
-    }
-
-  }
-
-  const spellPages = splitIntoPages(parsed.spells, 45);
-
-  for (let i = 1; i < spellPages.length; i++) {
-
-    const templateIndex = 2;
-
-    const copied = await pdfDoc.copyPages(pdfDoc, [templateIndex]);
-
-    pdfDoc.addPage(copied[0]);
+    } catch (e) {}
 
   }
 
   fillWeapons(form, parsed.weapons);
 
   fillFeatures(form, parsed.feats);
+
+  fillInventory(form, parsed.equipment);
 
   fillSpells(form, parsed.spells);
 
@@ -93,16 +77,11 @@ async function exportCharacterPDF(actor) {
 
 }
 
-
-function resolveFoundryPath(actor, path, parsed) {
+function resolveFoundryPath(actor, path) {
 
   if (!path) return "";
 
   if (path === "game.user.name") return game.user.name;
-
-  if (path === "items[type=weapon]") return parsed.weapons;
-  if (path === "items[type=spell]") return parsed.spells;
-  if (path === "items[type=feat]") return parsed.feats;
 
   const parts = path.split(".");
 
