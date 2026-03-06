@@ -77,6 +77,8 @@ async function exportCharacterPDF(actor) {
 
   fillFeatures(form, parsed.feats);
 
+  fillSpells(form, parsed.spells);
+
   const finalPdf = await pdfDoc.save();
 
   const blob = new Blob([finalPdf], { type: "application/pdf" });
